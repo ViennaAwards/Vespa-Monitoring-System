@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#!">Info</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/chart">Chart</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page header with logo and tagline-->
+        <header class="py-5 bg-light border-bottom mb-4">
+            <div class="container">
+                <div class="text-center my-5">
+                    <h1 class="fw-bolder">Detail Information Page</h1>
+                </div>
+            </div>
+        </header>
+
+    <style>
+
+        #Species{
+            padding: 0px;
+        }
+
+        #Time{
+            padding: 0px;
+        }
+
+        #IP {
+            padding: 0px;
+        }
+
+        #Select{
+            margin : 0px;
+            padding: 0px;
+        }
+        #right_list{
+            margin : 0px;
+            padding: 0px;
+        }
+        #left_list{
+            margin : 0px;
+            padding: 0px;
+        }
+        #Detect{
+            margin : 0px;
+            padding: 0px;
+        }
+        #Total_Result{
+            margin : 0px;
+            padding: 0px;
+        }
+        #Detail{
+            margin : 0px;
+            padding: 0px;
+        }
+        #Top{
+            padding: 0px;
+        }
+    </style>
+
+    <body>
+        <center>
+        <table id = "Total_Result" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th width="10%"> Total Num </th>
+                    <th width="10%"> Black Num </th>
+                    <th width="10%"> Simil Num </th>
+                    <th width="10%"> Crabro Num </th>
+                    <th width="10%"> ggoma Num </th>
+                    <th width="10%"> Jangsu Num </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ total_num[0] }}</td>
+                    <td>{{ black_num[0] }}</td>
+                    <td>{{ simil_num[0] }}</td>
+                    <td>{{ crabro_num[0] }}</td>
+                    <td>{{ ggoma_num[0] }}</td>
+                    <td>{{ jangsu_num[0] }}</a></td>
+                </tr>
+                <tr>
+                    <td>{{ total_ratio }}</td>
+                    <td>{{ black_ratio }}</td>
+                    <td>{{ simil_ratio }}</td>
+                    <td>{{ crabro_ratio }}</td>
+                    <td>{{ ggoma_ratio }}</td>
+                    <td>{{ jangsu_ratio }}</a></td>
+                </tr>
+            </tbody>
+        </table>
+        </center>
+        {% block page_content %}
+        <div id = "left_list" style="float:left">
+            <table id = "Result" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th width="20%"> Detect Species </th>
+                    <th width="20%"> Detect Time </th>
+                    <th width="20%"> Detect IP </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in result_list %}
+                <p><tr onclick="select('{{i[3]}}','{{i[1]}}','{{i[2]}}','{{i[0]}}')" align = "center" bgcolor="white">
+                    <td>{{ i[1] }}</td>
+                    <td>{{ i[2] }}</td>
+                    <td>{{ i[0] }}</td>
+                </tr></p>
+                {% endfor %}
+            </tbody>
+        </table>
+        {{ pagination.links }}
+        </div>
+        {% endblock %}
+        <div class="container" id = "Detail" style="float: right">
+            <div class="row">
+                <!-- Blog entries-->
+                <div class="col-lg-8">
+                <!-- Featured blog post-->
+                <div class="card mb-4">
+                <img class="card-img-top" id = "Image" name="Image"/>
+                <div class="card-body">
+                <div class="small text-muted" id="Client_IP" name="Client_IP"></div>
+                <h2 class="card-title" id="Detect_Species" name="Detect_Species"></h2>
+                <p class="card-text" id="Detect_Time" name="Detect_Time"></p>
+            </div>
+        </div>
+
+    </body>
+</html>
+
+<script>
+    function select(test,species,time,IP){
+        document.getElementById("Image").src = test;
+        $('#Detect_Species').html("Detect_Species:"+species);
+        $('#Detect_Time').html("Detect_Time:"+time);
+        $('#Client_IP').html("Client_IP:"+IP);
+    }
+</script>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+        <script src="https://d3js.org/d3.v3.min.js"></script>
+        <script src="https://d3js.org/topojson.v0.min.js"></script>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#!">Info</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/chart">Chart</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page header with logo and tagline-->
+        <header class="py-5 bg-light border-bottom mb-4">
+            <div class="container">
+                <div class="text-center my-5">
+                    <h1 class="fw-bolder">Chart Page</h1>
+                </div>
+            </div>
+        </header>
+
+        <style>
+            #Total_Result{
+                margin-top: 0px;
+                margin-bottom: 0px;
+                margin-left: 0px;
+                margin-right: 0px;
+                border: 1px solid black;
+            }
+            #modal.modal-overlay {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(1.5px);
+            -webkit-backdrop-filter: blur(1.5px);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        #modal .modal-window {
+            background: rgba( 69, 139, 197, 0.70 );
+            box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+            backdrop-filter: blur( 13.5px );
+            -webkit-backdrop-filter: blur( 13.5px );
+            border-radius: 10px;
+            border: 1px solid rgba( 255, 255, 255, 0.18 );
+            width: 35%;
+            height: 45%;
+            position: relative;
+            top: -100px;
+            padding: 10px;
+        }
+        #modal .title {
+            padding-left: 10px;
+            display: inline;
+            text-shadow: 1px 1px 2px gray;
+            color: white;
+            
+        }
+        #modal .title h2 {
+            display: inline;
+        }
+        #modal .close-area {
+            display: inline;
+            float: right;
+            padding-right: 10px;
+            cursor: pointer;
+            text-shadow: 1px 1px 2px gray;
+            color: white;
+        }
+        
+        #modal .content {
+            margin-top: 20px;
+            padding: 0px 10px;
+            text-shadow: 1px 1px 2px gray;
+            color: white;
+        }
+    svg {
+      background-color: #eee;
+    }
+    .municipality {
+        fill: #eee;
+        stroke: #999;
+    }
+    .municipality:hover {
+        fill: orange;
+    }
+    #Korea_Chart{
+        margin-top: 0px;
+        margin-left: 0px;
+        float: left;
+    }
+
+            td,th{
+                border: 1px solid black;
+                padding-top: 0px;
+                padding-bottom: 0px;
+                padding-right: 0px;
+                padding-left: 0px;
+                text-align: center;
+            }
+
+            #Current_Chart{
+                float: right;
+            }
+        </style>
+        <body>
+            <div id="modal" class="modal-overlay">
+                <div class="modal-window">
+                    <div class="close-area">X</div>
+                    <div class="content"></div>
+                </div>
+            </div>
+            <center>
+                <table id = "Total_Result" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th width="20%"> Total Num </th>
+                            <th width="20%"> Day1_Ago </th>
+                            <th width="20%"> Day2_Ago </th>
+                            <th width="20%"> Day3_Ago </th>
+                            <th width="20%"> Day4_Ago </th>
+                        </tr>
+                    </thead>
+                <tbody>
+                    <tr>
+                        <td width="20%">{{ Today[0] }}</td>
+                        <td width="20%">{{ Day1_Ago[0] }}</td>
+                        <td width="20%">{{ Day2_Ago[0] }}</td>
+                        <td width="20%">{{ Day3_Ago[0] }}</td>
+                        <td width="20%">{{ Day4_Ago[0] }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            </center>
+            <div>
+            <div id="Korea_Chart"></div>
+            <div id = "Current_Chart">
+            <canvas id="myChart" style="height:20vh; width:30vw"></canvas>
+            <canvas id="Species_Pie_Chart" style="height:20vh; width:30vw"></canvas>
+            </div>
+            </div>
+            <script>
+            var ctx = document.getElementById('myChart');
+            var pie_ctx = document.getElementById('Species_Pie_Chart');
+            var chart_data_lst = {{date_detection_num|tojson}} ;
+            var Species_Pie_Chart_data_lst = {{species_detection|tojson}} ;
+	var myChart = new Chart(ctx, {
+	    type: 'line',
+	    data: {
+			labels: ['Today', '1Day_Ago', '2Day_Ago', '3Day_Ago', '4Day_Ago'],
+			datasets: [{
+				label: 'Total Detection',
+				data: chart_data_lst,
+				backgroundColor: [
+						'rgba(0, 0, 0, 0)'
+				],
+				borderColor: [
+						'rgba(255, 99, 132, 1)',
+						'rgba(54, 162, 235, 1)',
+						'rgba(255, 206, 86, 1)',
+						'rgba(75, 192, 192, 1)',
+						'rgba(153, 102, 255, 1)'
+				],
+				borderWidth: 2
+			}]
+		},
+		options: {
+			responsive: false,
+			tooltips: {
+				enabled: false
+			},
+			hover: {
+				animationDuration: 0
+			},
+			animation: {
+				duration: 1,
+				onComplete: function () {
+					var chartInstance = this.chart,
+						ctx = chartInstance.ctx;
+					ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+					ctx.fillStyle = 'purple';
+					ctx.textAlign = 'center';
+					ctx.textBaseline = 'bottom';
+
+					this.data.datasets.forEach(function (dataset, i) {
+						var meta = chartInstance.controller.getDatasetMeta(i);
+						meta.data.forEach(function (bar, index) {
+							var data = dataset.data[index];							
+							ctx.fillText(data, bar._model.x, bar._model.y - 5);
+						});
+					});
+				}
+			},
+			scales: {
+				yAxes: [{
+					ticks: {
+						beginAtZero: true,
+						stepSize : 2,
+						fontSize : 14,
+					}
+				}]
+			}
+		}
+	});
+            </script>
+        <script>
+        var Species_Pie_Chart = new Chart(pie_ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Black', 'Simil', 'Crabro', 'ggoma', 'Jangsu'],
+                datasets: [{
+                    label: 'Detection',
+                    data: Species_Pie_Chart_data_lst,
+                    backgroundColor: [
+                            'rgba(0, 0, 0, 0)'
+                    ],
+                    borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                    ],
+                    //borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: false
+            }
+        });
+            </script>
+    <script>
+    function DrawKoreaMap(innerWidth,innerHeight){
+        var w = innerWidth*0.4, h = innerHeight*0.5;
+        var proj = d3.geo.mercator()
+        .center([128.0, 35.9])
+        .scale((w+h)*2.5)
+        .translate([w/2, h/2]);
+        
+        var Korea_Location_Name = {};
+        var Arr = [];
+        var path = d3.geo.path().projection(proj);
+
+        var svg = d3.select("#Korea_Chart").append("svg")
+        .attr("width", w)
+        .attr("height", h);
+    
+        d3.json("https://raw.githubusercontent.com/southkorea/southkorea-maps/master/gadm/json/skorea-municipalities-topo.json", function(error, kor) {
+            var municipalities = topojson.object(kor, kor.objects['skorea-municipalities-geo']);
+            json_num = Object.keys(municipalities.geometries).length;
+            for (i=0; i<json_num; i++){
+                Arr.push(municipalities.geometries[i].properties.NAME_2);
+            }
+            Object.assign(Korea_Location_Name,Arr)
+            svg.selectAll('path').data(municipalities.geometries).enter().append('path').attr('d', path).attr('class', 'municipality');
+            svg.selectAll('path').data(Arr).attr('name', (function(d) { return d; })).enter().append('path').attr('name', (function(d) { return d; }));
+        });
+    }
+    </script> 
+</body>
+
+<!--<script>
+    function Species_selected(){
+                var species = $('#Species').val();
+                $.ajax({
+                        type : 'POST', 
+                        url : '{{url_for("change_species")}}',
+                        data : {
+                               Species:species
+                        },
+                        dataType : 'JSON',
+                        success : function(result){
+                            var detail_chart = document.getElementById('Detail_Chart');
+                var detail_chart_data_lst = result;
+        
+        var Detail_Chart = new Chart(detail_chart, {
+            type: 'line',
+            data: {
+                labels: ['Today', '1Day_Ago', '2Day_Ago', '3Day_Ago', '4Day_Ago'],
+                datasets: [{
+                    label: 'Detection',
+                    data: detail_chart_data_lst,
+                    backgroundColor: [
+                            'rgba(0, 0, 0, 0)'
+                    ],
+                    borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: false,
+                tooltips: {
+                    enabled: false
+                },
+                hover: {
+                    animationDuration: 0
+                },
+                animation: {
+                    duration: 1,
+                    onComplete: function () {
+                        var chartInstance = this.chart,
+                        ctx = chartInstance.ctx;
+                        ctx.font = Chart.helpers.fontString(Chart.defaults.global.defaultFontSize, Chart.defaults.global.defaultFontStyle, Chart.defaults.global.defaultFontFamily);
+                        ctx.fillStyle = 'purple';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+    
+                        this.data.datasets.forEach(function (dataset, i) {
+                            var meta = chartInstance.controller.getDatasetMeta(i);
+                            meta.data.forEach(function (bar, index) {
+                                var data = dataset.data[index];							
+                                ctx.fillText(data, bar._model.x, bar._model.y - 5);
+                            });
+                        });
+                    }
+                },
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true,
+                            stepSize : 2,
+                            fontSize : 14,
+                        }
+                    }]
+                }
+            }
+        });
+                        },
+                        error : function(xtr,status,error){
+                            alert(error)
+                        }
+                });
+    }
+</script>-->
+
+<!--<script>
+    function load_IPlist(){
+        var List = {{IP_list|tojson}};
+        var i;
+        $('#Client_IP_List').empty();
+        for(i=0;i<List.length;i++){
+            form_start = "<for<div id = "Current_Chart">m method='GET' action='/Show_Chart'>"
+            temp = "<button type = 'submit'"+ 'id='+"'"+i+"'"+">"+"'"+List[i]+"'"+"</button></br>";
+            ip = "<input type='hidden' name='ip' value="+List[i]+">"
+            form_end = "</form>"
+            $('#Client_IP_List').append(form_start+temp+ip+form_end);
+        }
+        //alert(List);
+    }
+</script>
+<script>
+    window.onload = function() {
+        load_IPlist();
+    }
+</script>-->
+
+<script>
+    var innerWidth;
+    var innerHeight;
+    window.onload = function() {
+        innerWidth = window.innerWidth;
+        innerHeight = window.innerHeight;
+        DrawKoreaMap(innerWidth,innerHeight);
+    } 
+    $(window).resize(function() {
+        var Width = $(window).width();
+        var height = $(window).height();
+        $("#Korea_Chart").empty();
+        DrawKoreaMap(Width,height);
+    });
+
+    const modal = document.getElementById("modal")
+    const closeBtn = modal.querySelector(".close-area")
+    closeBtn.addEventListener("click", e => {
+        modal.style.display = "none"
+    })
+    modal.addEventListener("click", e => {
+        const evTarget = e.target
+        if(evTarget.classList.contains("modal-overlay")) {
+            modal.style.display = "none"
+        }
+    })
+    $(document).on('click', '.municipality', function(e){
+            var Data_Location_List = new Array();
+            var Species_Location_List = new Array();
+            var Data_Location_Obj = {};
+            var Species_Location_Obj = {};
+            e.preventDefault();        
+            var location_name = $(this).attr("name");
+            var postdata = {'location_name':location_name}
+            $.ajax({
+                type: 'POST',
+                url: '{{url_for("location_name")}}',
+                data: JSON.stringify(postdata),
+                dataType : 'JSON',
+                contentType: "application/json",
+                success: function(data){
+                    for(var i=0;i<10;i++){
+                        if(i<5){
+                            Data_Location_List.push(data[i]);
+                        }
+                        else{
+                            Species_Location_List.push(data[i]);
+                        }
+                    }
+                    Object.assign(Data_Location_Obj,Data_Location_List);
+                    Object.assign(Species_Location_Obj,Species_Location_List);
+                    modal.style.display = 'flex';
+                    $('.content').empty();
+                    start = "<div id = 'Current_Chart'>";
+                    data_chart = "<canvas id='Data_Chart' style='height:20vh; width:30vw'></canvas>";
+                    Species_chart = "<canvas id='Species_Chart' style='height:20vh; width:30vw'></canvas>";
+                    end = "</div>";
+                    $('.content').append(start+data_chart+Species_chart+end);
+                    DrawLocationChart(Data_Location_List);
+                    DrawPieLocationChart(Species_Location_List);
+                },
+                error: function(request, status, error){
+                    alert(error);
+                }
+            });
+        alert($(this).attr("name"));
+    })
+</script>
+
+
+<script>
+    function DrawLocationChart(Data_Location_List){  
+        var chart_location = document.getElementById('Data_Chart');
+        var myChart = new Chart(chart_location, {
+        type: 'line',
+        data: {
+            labels: ['Today', '1Day_Ago', '2Day_Ago', '3Day_Ago', '4Day_Ago'],
+            datasets: [{
+                label: 'Total Detection',
+                data: Data_Location_List,
+                backgroundColor: [
+                        'rgba(0, 0, 0, 0)'
+                ],
+                borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: false,
+            tooltips: {
+                enabled: false
+            },
+            hover: {
+                animationDuration: 0
+            },
+            animation: {
+                duration: 1
+            },
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        stepSize : 2,
+                        fontSize : 14,
+                    }
+                }]
+            }
+        }
+        });
+    }
+    function DrawPieLocationChart(Species_Location_List){
+        var pie_location = document.getElementById('Species_Chart');
+        var Species_Pie_Chart = new Chart(pie_location, {
+            type: 'pie',
+            data: {
+                labels: ['Black', 'Simil', 'Crabro', 'ggoma', 'Jangsu'],
+                datasets: [{
+                    label: 'Detection',
+                    data: Species_Location_List,
+                    backgroundColor: [
+                            'rgba(0, 0, 0, 0)'
+                    ],
+                    borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)'
+                    ],
+                    //borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: false
+            }
+        });
+    }
+</script>

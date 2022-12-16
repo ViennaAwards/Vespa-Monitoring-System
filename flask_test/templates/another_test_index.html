@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<style> 
+    .modal{ 
+  position:absolute; width:100%; height:100%; background: rgba(0,0,0,0.8); top:0; left:0; display:none;
+}
+
+.modal_content{
+  width:400px; height:200px;
+  background:#fff; border-radius:10px;
+  position:relative; top:20%; left:20%;
+  margin-top:-100px; margin-left:-200px;
+  text-align:left;
+  box-sizing:border-box; padding:74px 0;
+}
+</style>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        <script src="http://code.jquery.com/jquery-latest.js"></script> 
+
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
+    <body onload="RecieveIPlist();">
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="modal" id="list" style="display: none;">
+                <div class="modal_content" id="content">
+
+                </div>
+            </div>
+            <center>
+                <button onclick="ShowIPlist();"><img src="{{ url_for('static', filename='image/free-icon-menu-of-three-lines-59660.png') }}" style="width:50px; height:40px; background-color: transparent;";></button>
+            </center>
+            <div class="container">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#!">Info</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/chart">Chart</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page header with logo and tagline-->
+        <header class="py-5 bg-light border-bottom mb-4">
+            <div class="container">
+                <div class="text-center my-5">
+                    <h1 class="fw-bolder">VESMO(Vespa Monitoring System)</h1>
+                    <p class="lead mb-0" id="Server_IP" name="Server_IP"></p>
+                </div>
+            </div>
+            <!-- Page content-->
+        <div class="container">
+            <div class="row">
+                <!-- Blog entries-->
+                <div class="col-lg-8">
+                    <!-- Nested row for non-featured blog posts-->
+                    <div class="row">
+                        <div class="col-lg-6" id="list_image">
+                            <!-- Blog post-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </header>
+</html>
+
+<script>
+    function ShowIPlist(){
+        $('#list').show();
+    }
+</script>
+
+<script>
+    function RecieveIPlist(){
+        var len;
+        var temp;
+            $.ajax({
+                type : 'POST',
+                url: '{{url_for("IPlist")}}',
+                dataType : 'JSON',success : function(result){
+                    $('#content').empty();
+                    for (len=1; len<=result[0]; len++){
+                        console.log(result[len]);
+                        temp = "<button onclick = 'loaddata(this);'"+ 'id='+"'"+len+"'"+">"+"'"+result[len]+"'"+"</button></br>";
+                        $('#content').append(temp);
+                    }
+                },
+                error : function(xtr,status,error){//alert(xtr +":"+status+":"+error);
+                }
+                });
+        setTimeout("RecieveIPlist()",360000);
+    }
+</script>
+
+<script>
+    function loaddata(e){
+        var postdata = {'IP':$(e).html()};
+        $.ajax({
+            type:'GET',
+            url: '{{url_for("monitoring")}}',
+            data: JSON.stringify(postdata),
+            dataType : 'JSON',
+            contentType:"application/json",
+            success : function(result){},
+            error : function(xtr,status,error){alert(xtr +":"+status+":"+error);}
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    function changeImg(recv_IP){
+        var port_len;
+        var image,ip,address,species,time,port;
+        var send_ip;
+        var temp;
+        //alert(recv_IP)
+        var IP_postdata = {'IP':"'"+recv_IP+"'"};
+        $.ajax({
+            type:'POST',
+            url: '{{url_for("loaddata")}}',
+            data: JSON.stringify(IP_postdata),
+            dataType : 'JSON',
+            contentType:"application/json",
+            success : function(result){
+                //alert(result)
+                send_ip = result[2][4]
+                //alert(send_ip)
+                //alert(image+ip+address+species+time+port)
+                for(port_len=2; port_len<result[0]+2; port_len++){
+                    //alert($('#'+port_len+'_IP').html);
+                    //alert($('#'+port_len+'_Image').attr('name'))
+                    //alert("'"+result[port_len][1]+"'");
+                    document.getElementById(port_len+'_Image').src = result[port_len][1];
+                    $('#'+port_len+'_IP').html(result[port_len][4]);
+                    $('#'+port_len+'_Address').html(result[1]);
+                    $('#'+port_len+'_Species').html(result[port_len][2]);
+                    $('#'+port_len+'_Time').html(result[port_len][3]);
+                    $('#'+port_len+'_Port').html(result[port_len][5]);
+                }
+                setTimeout(changeImg(send_ip),1000)
+                //alert("changeImg("+"'"+send_ip+"'"+")")
+                //changeImg(send_ip);
+                //$('#list_image').append(image+ip+address+species+time+port);
+            },
+            error : function(xtr,status,error){alert(xtr +":"+status+":"+error);}
+        });
+    }
+</script>

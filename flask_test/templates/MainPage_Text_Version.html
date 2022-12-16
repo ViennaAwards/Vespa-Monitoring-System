@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<style> 
+    .modal{ 
+  position:absolute; width:100%; height:100%; background: rgba(0,0,0,0.8); top:0; left:0; display:none;
+}
+
+.modal_content{
+  width:400px; height:200px;
+  background:#fff; border-radius:10px;
+  position:relative; top:20%; left:20%;
+  top:20%; left:30%;
+  text-align:left;
+  box-sizing:border-box; padding:74px 0;
+}
+</style>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+        <script src="http://code.jquery.com/jquery-latest.js"></script> 
+
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="modal" id="list" style="display: none;">
+                <div class="modal_content" id="content">
+
+                </div>
+            </div>
+            <center>
+                <button onclick="ShowIPlist();"><img src="{{ url_for('static', filename='image/free-icon-menu-of-three-lines-59660.png') }}" style="width:50px; height:40px; background-color: transparent;";></button>
+            </center>
+            <div class="container">
+                <!--<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>-->
+                <div id="navbarSupportedContent" >
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#!">Info</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/chart">Chart</a></li>
+                    </ul>
+            </div>
+        </nav>
+        <!-- Page header with logo and tagline-->
+        <header class="py-5 bg-light border-bottom mb-4">
+            <div class="container">
+                <div class="text-center my-5">
+                    <h1 class="fw-bolder">VESMO(Vespa Monitoring System)</h1>
+                    <p class="lead mb-0" id="Server_IP" name="Server_IP"></p>
+                </div>
+            </div>
+            <!-- Page content-->
+        <!--<div class="container" style="display: grid;">-->
+            <!--<div class="row">-->
+                <!-- Blog entries-->
+                <!--<div class="col-lg-8">-->
+                    <!-- Nested row for non-featured blog posts-->
+                    <!--<div class="row">-->
+                        <div class="container" id="list_image" style="display: grid; float: center; grid-template-columns: 1fr 1fr 1fr;">
+                            <!-- Blog post-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </header>
+</html>
+
+<script>
+    function ShowIPlist(){
+        $('#list').show();
+    }
+</script>
+
+<script>
+    function RecieveIPlist(){
+        var len;
+        var temp;
+        var form_start,form_end;
+            $.ajax({
+                type : 'POST',
+                url: '{{url_for("IPlist")}}',
+                dataType : 'JSON',success : function(result){
+                    $('#content').empty();
+                    for (len=1; len<=result[0]; len++){
+                        form_start = "<form method='GET' action='/monitoring'>"
+                        temp = "<button type = 'submit'"+ 'id='+"'"+len+"'"+">"+"'"+result[len]+"'"+"</button></br>";
+                        ip = "<input type='hidden' name='ip' value="+result[len]+">"
+                        form_end = "</form>"
+                        $('#content').append(form_start+temp+ip+form_end);
+                    }
+                },
+                error : function(xtr,status,error){
+                }
+                });
+        setTimeout("RecieveIPlist()",360000);
+    }
+</script>
+
+<script>
+    function loaddata(e){
+        var port_len;
+        var image,ip,address,species,time,port;
+        var send_ip;
+        var temp;
+        var postdata;
+        var start,end;
+        if (event.target.nodeName == "BUTTON"){
+            postdata = {'IP':$(e).html()};
+        }
+        else{
+            postdata = {'IP':"'"+e+"'"};
+        }
+        $.ajax({
+            type:'POST',
+            url: '{{url_for("loaddata")}}',
+            data: JSON.stringify(postdata),
+            dataType : 'JSON',
+            contentType:"application/json",
+            success : function(result){
+                $('#list_image').empty();
+                send_ip = result[2][3]
+                for(port_len=2; port_len<result[0]+2; port_len++){
+                    start = "<div class='card md-4'>"
+                    image = "<img class='card-img-top' id = "+"'"+port_len+send_ip+"_Image'"+"name='1st_Camera_Image'/>"
+                    div_start = "<div class='card-body'>"
+                    ip =  "<p class='card-text'  id="+"'"+port_len+send_ip+"_IP'"+"name='1st_Camera_Client_IP'></p>"
+                    //address = "<p class='card-text'  id="+"'"+port_len+send_ip+"_Address'"+"name='1st_Camera_Client_IP'></p>"
+                    species = "<p class='card-text'  id="+"'"+port_len+send_ip+"_Species'"+"name='1st_Camera_Client_IP'></p>"
+                    time = "<p class='card-text'  id="+"'"+port_len+send_ip+"_Time'"+"name='1st_Camera_Client_IP'></p>"
+                    port = "<p class='card-text'  id="+"'"+port_len+send_ip+"_Port'"+"name='1st_Camera_Client_IP'></p>"
+                    detail_form = "<form action='/archieve' method='GET'><input type='hidden' name='ip' value="+result[port_len][3]+"><input type='hidden' name='port' value="+result[port_len][4]+"><input type='submit' value='Detail ->'></a></form>"
+                    div_end = "</div>"
+                    end = "</div>"
+                    $('#list_image').append(start+image+div_start+ip+species+time+port+detail_form+div_end+end);
+                }
+                changeImg(send_ip)
+            },
+            error : function(xtr,status,error){alert(xtr +":"+status+":"+error);}
+        });
+        $('#list').hide();
+    }
+</script>
+
+<script type="text/javascript">
+    var IP_postdata;
+    function changeImg(recv_IP){
+        var port_len;
+        var image,ip,address,species,time,port;
+        var send_ip;
+        var temp;
+        IP_postdata = {};
+        IP_postdata = {'IP':"'"+recv_IP+"'"};
+        $.ajax({
+            type:'POST',
+            url: '{{url_for("loaddata2")}}',
+            data: JSON.stringify(IP_postdata),
+            dataType : 'JSON',
+            contentType:"application/json",
+            success : function(result){
+                send_ip = result[2][3]
+                for(port_len=2; port_len<result[0]+2; port_len++){
+                    document.getElementById(port_len+result[port_len][3]+'_IP').innerHTML = result[port_len][3];
+                    document.getElementById(port_len+result[port_len][3]+'_Species').innerHTML = result[port_len][1];
+                    document.getElementById(port_len+result[port_len][3]+'_Time').innerHTML = result[port_len][2];
+                    document.getElementById(port_len+result[port_len][3]+'_Port').innerHTML = result[port_len][4];
+                }
+                changeImg(send_ip)
+            },
+            error : function(xtr,status,error){alert(xtr +":"+status+":"+error);}
+        });
+    }
+</script>
+
+<script>
+    function loaddata_IP(){
+        var ip_len;
+        var list_image_name = document.getElementById("list_image");
+        //list_image.style.cssText = "float: center; width:"+innerWidth+"px; height:"+innerHeight+"px;"
+        $.ajax({
+            type:'POST',
+            url: '{{url_for("loaddata_IP")}}',
+            dataType : 'JSON',
+            contentType:"application/json",
+            success : function(result){
+                $('#list_image').empty();
+                for(ip_len=2; ip_len<result[0]+2; ip_len++){
+                    start = "<div class='card md-4'>"
+                    div_start = "<div class='card-body'>"
+                    ip =  "<p class='card-text'  id="+"'"+ip_len+result[ip_len][3]+"_IP'"+"name='1st_Camera_Client_IP'></p>"
+                    species = "<p class='card-text'  id="+"'"+ip_len+result[ip_len][3]+"_Species'"+"name='1st_Camera_Client_IP'></p>"
+                    time = "<p class='card-text'  id="+"'"+ip_len+result[ip_len][3]+"_Time'"+"name='1st_Camera_Client_IP'></p>"
+                    port = "<p class='card-text'  id="+"'"+ip_len+result[ip_len][3]+"_Port'"+"name='1st_Camera_Client_IP'></p>"
+                    detail_form = "<form action='/archieve' method='GET'><input type='hidden' name='ip' value="+result[ip_len][3]+"><input type='hidden' name='port' value="+result[ip_len][4]+"><input type='submit' value='Detail ->'></a></form>"
+                    div_end = "</div>"
+                    end = "</div>"
+                    $('#list_image').append(start+div_start+ip+species+time+port+detail_form+div_end+end);
+                }
+                changeImg_IP();
+            },
+            error : function(xtr,status,error){alert(xtr +":"+status+":"+error);}
+        });
+    }
+</script>
+<script>
+    function changeImg_IP(){
+        var ip_len;
+        $.ajax({
+            type:'POST',
+            url: '{{url_for("loaddata_IP")}}',
+            dataType : 'JSON',
+            contentType:"application/json",
+            success : function(result){
+                for(ip_len=2; ip_len<result[0]+2; ip_len++){
+                    document.getElementById(ip_len+result[ip_len][3]+'_IP').innerHTML = result[ip_len][3];
+                    document.getElementById(ip_len+result[ip_len][3]+'_Species').innerHTML = result[ip_len][1];
+                    document.getElementById(ip_len+result[ip_len][3]+'_Time').innerHTML = result[ip_len][2];
+                    document.getElementById(ip_len+result[ip_len][3]+'_Port').innerHTML = result[ip_len][4];
+                }
+                changeImg_IP()
+            },
+            error : function(){alert("error");}
+        });
+    }
+</script>
+
+<script>
+    function split_IP(){
+        // 리턴값을 위한 변수 선언
+        var returnValue;
+
+        // 현재 URL 가져오기
+        var url = location.href;
+
+        // get 파라미터 값을 가져올 수 있는 ? 를 기점으로 slice 한 후 split 으로 나눔
+        var parameters = (url.slice(url.indexOf('?') + 1, url.length)).split('&');
+        var contatins_test = "'"+parameters+"'"
+        var ip = contatins_test.split('=')
+        if (contatins_test.includes('ip=')==false){
+            loaddata_IP();
+        }
+        else{
+            loaddata(ip[1].replace("'",""));
+        }
+    }
+</script>
+
+<script>
+    //var innerWidth;
+    //var innerHeight;
+    window.onload = function() {
+        //innerWidth = window.innerWidth;
+        //innerHeight = window.innerHeight;
+        var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent); // 안드로이드 아이폰을 검사해 체크
+        if(isMobile == false){
+            var OS_object = 'win16|win32|win64|windows|mac|macintel|linux|freebsd|openbsd|sunos'.indexOf(navigator.platform.toLowerCase()) >= 0;
+        }
+        else{
+            var varUA = navigator.userAgent.toLowerCase(); //userAgent 값 얻기 
+            if ( varUA.indexOf('android') > -1) {
+                document.getElementById("list_image").style.display='';
+                //안드로이드
+            } 
+            else if ( varUA.indexOf("iphone") > -1 || varUA.indexOf("ipad") > -1 ||varUA.indexOf("ipod") > -1 ) {
+
+                //IOS
+            } 
+            else {
+
+                //아이폰, 안드로이드 외 모바일
+            }
+        }
+        RecieveIPlist();
+        split_IP();
+    }
+
+    window.onresize = function() {
+        //innerWidth = window.innerWidth;
+        //innerHeight = window.innerHeight;
+    }
+</script>
